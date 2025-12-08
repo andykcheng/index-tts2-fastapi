@@ -12,6 +12,7 @@ conda_env*/
 
 # Python Bytecode.
 *.py[cod]
+*.pyc
 
 # Distribution/Packaging.
 /build/
@@ -29,3 +30,6 @@ desktop.ini
 /checkpoints/*
 !/checkpoints/*.yaml
 /outputs/
+
+# Miscellaneous
+.env
