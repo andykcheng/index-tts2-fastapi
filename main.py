@@ -8,6 +8,14 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse, HTM
 from pydantic import BaseModel
 # from pydub import AudioSegment  <-- Removed pydub
 from indextts.infer_v2 import IndexTTS2
+import yaml
+# before loading the model, change the file checkpoints/config.yaml to set max_text_tokens to 30 for faster inference on short texts
+with open("checkpoints/config.yaml", 'r') as f:
+    config = yaml.safe_load(f)
+    config['gpt']['max_text_tokens'] = 30
+with open("checkpoints/config.yaml", 'w') as f:
+    yaml.dump(config, f)
+    
 app = FastAPI(title="IndexTTS Opus Server")
 
 # Ensure output directory exists
@@ -20,9 +28,10 @@ try:
     tts_engine = IndexTTS2(
         cfg_path="checkpoints/config.yaml", 
         model_dir="checkpoints", 
-        use_fp16=False, 
-        use_cuda_kernel=False, 
-        use_deepspeed=False
+        use_fp16=True, 
+        use_cuda_kernel=True, 
+        use_deepspeed=True,
+        use_accel=True
     )
     print("Model loaded successfully.")
 except Exception as e:
