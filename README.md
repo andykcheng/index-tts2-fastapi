@@ -58,12 +58,6 @@ uv run uvicorn main:app --host 0.0.0.0 --port 8000
 uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### Using Docker
-```bash
-./build_docker.sh
-# Then run the built container
-```
-
 ## API Endpoints
 
 The server provides the following endpoints:
