@@ -32,3 +32,5 @@ outputs/
 
 # Miscellaneous
 .env
+voice_files/
+test_scripts/
