@@ -1,0 +1,9 @@
+.git
+.github
+.venv
+.env
+__pycache__
+*.pyc
+outputs/
+build_docker.sh
+run_docker.sh
