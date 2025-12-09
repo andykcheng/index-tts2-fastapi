@@ -64,9 +64,11 @@ async def generate_audio(request: TTSRequest, background_tasks: BackgroundTasks)
 
     except Exception as e:
         print(f"Error during TTS processing: {e}")
+        # output the stack trace for debugging
+        import traceback
+        traceback.print_exc()
+        
         # Cleanup if something crashed midway
-        if os.path.exists(wav_filename): os.remove(wav_filename)
-        if os.path.exists(opus_filename): os.remove(opus_filename)
         raise HTTPException(status_code=500, detail=str(e))
 
 
