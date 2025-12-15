@@ -34,3 +34,4 @@ outputs/
 .env
 voice_files/
 test_scripts/
+docker/voice_files
