@@ -201,6 +201,23 @@ async def generate_audio_wav_json(request: TTSRequest, background_tasks: Backgro
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/list_voices")
+async def list_voices():
+    voice_dir = "voice_files"
+    if not os.path.exists(voice_dir):
+        return JSONResponse({"voices": []})
+    
+    voices = []
+    try:
+        for filename in os.listdir(voice_dir):
+            if filename.lower().endswith(".wav"):
+                # The system expects voice_id without extension
+                voice_id = os.path.splitext(filename)[0]
+                voices.append(voice_id)
+        return JSONResponse({"voices": sorted(voices)})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error listing voices: {str(e)}")
+
 @app.get("/")
 async def read_root():
     readme = """
@@ -271,6 +288,16 @@ Generates audio in WAV format and returns base64-encoded data in JSON.
        -H "Content-Type: application/json" \\
        -d '{"text": "Hello world", "voice_id": "voice_01"}' \\
        -o response.json
+  ```
+
+### GET /list_voices
+Lists available voice IDs by scanning the `voice_files` directory.
+
+- **Response**: JSON with `{"voices": ["voice_id1", "voice_id2", ...]}`.
+
+- **Example**:
+  ```
+  curl -X GET "http://localhost:8000/list_voices" -o voices.json
   ```
 
 ## Notes
