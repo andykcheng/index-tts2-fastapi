@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 RUN git lfs install
+ARG CACHEBUST=1
 RUN git clone https://github.com/andykcheng/index-tts2-fastapi.git
 WORKDIR /app/index-tts2-fastapi
 RUN uv sync
