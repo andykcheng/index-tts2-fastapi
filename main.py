@@ -8,25 +8,35 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse, HTM
 from pydantic import BaseModel
 # from pydub import AudioSegment  <-- Removed pydub
 from indextts.infer_v2 import IndexTTS2
+from indextts.infer import IndexTTS
 import yaml
     
 app = FastAPI(title="IndexTTS Opus Server")
-
+use_tts_verseion = 1
 # Ensure output directory exists
 OUTPUT_DIR = "outputs"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # Load model globally once at startup
-print("Loading IndexTTS Model...")
+print(".... Loading IndexTTS Model... verion is ", use_tts_verseion)
 try:
-    tts_engine = IndexTTS2(
-        cfg_path="checkpoints/config.yaml", 
-        model_dir="checkpoints", 
-        use_fp16=True, 
-        use_cuda_kernel=True, 
-        use_deepspeed=False,
-        use_accel=False
-    )
+    if use_tts_verseion == 2:
+        print(">>>>>>>>>> USING TTS VERSION 2 <<<<<<<<<<")
+        tts_engine = IndexTTS2(
+            cfg_path="checkpoints/config.yaml", 
+            model_dir="checkpoints", 
+            use_fp16=True, 
+            use_cuda_kernel=True, 
+            use_deepspeed=False,
+            use_accel=False
+        )
+    else:
+        print(">>>>>>>>>> USING TTS VERSION 1 <<<<<<<<<<")
+        tts_engine = IndexTTS(
+            cfg_path="checkpoints/config.yaml", 
+            model_dir="checkpoints", 
+        )
+        print("<<<<<<<< Model loaded successfully. >>>>>>>>>>")
     print("Model loaded successfully.")
 except Exception as e:
     print(f"Error loading model: {e}")
@@ -58,13 +68,21 @@ async def generate_audio_opus(request: TTSRequest, background_tasks: BackgroundT
             raise HTTPException(status_code=500, detail="TTS Engine not initialized")
 
         # Run Inference
-        tts_engine.infer(
-            spk_audio_prompt=f'voice_files/{request.voice_id}.wav', 
-            text=request.text, 
-            output_path=wav_filename, 
-            verbose=True
-        )
-        
+        if use_tts_verseion == 2:
+            print(">>>>>>>>>> USING TTS VERSION 2 IN /generate-opus <<<<<<<<<<")
+            tts_engine.infer(
+                spk_audio_prompt=f'voice_files/{request.voice_id}.wav', 
+                text=request.text, 
+                output_path=wav_filename, 
+                verbose=True
+            )
+        else:
+            print(">>>>>>>>>> USING TTS VERSION 1 IN /generate-opus <<<<<<<<<<")
+            tts_engine.infer(
+                f'voice_files/{request.voice_id}.wav', 
+                request.text, 
+                wav_filename
+            )
         # Convert WAV to Opus with specified bitrate using ffmpeg command
         subprocess.run([
             'ffmpeg', '-i', wav_filename, '-b:a', f'{request.bitrate}k', opus_filename
@@ -98,14 +116,23 @@ async def generate_audio_wav(request: TTSRequest, background_tasks: BackgroundTa
         if tts_engine is None:
             raise HTTPException(status_code=500, detail="TTS Engine not initialized")
 
-        # Run Inference
-        tts_engine.infer(
-            spk_audio_prompt=f'voice_files/{request.voice_id}.wav', 
-            text=request.text, 
-            output_path=wav_filename, 
-            verbose=True
-        )
-        
+        if use_tts_verseion == 2:
+            print(">>>>>>>>>> USING TTS VERSION 2 IN /generate-wav <<<<<<<<<<")
+            # Run Inference
+            tts_engine.infer(
+                spk_audio_prompt=f'voice_files/{request.voice_id}.wav', 
+                text=request.text, 
+                output_path=wav_filename, 
+                verbose=True
+            )
+        else: 
+            print(">>>>>>>>>> USING TTS VERSION 1 IN /generate-wav <<<<<<<<<<")
+            # Run Inference
+            tts_engine.infer(
+                f'voice_files/{request.voice_id}.wav', 
+                request.text, 
+                wav_filename
+            )
         # Read WAV file into memory
         with open(wav_filename, 'rb') as f:
             data = f.read()
@@ -132,13 +159,21 @@ async def generate_audio_opus_json(request: TTSRequest, background_tasks: Backgr
         if tts_engine is None:
             raise HTTPException(status_code=500, detail="TTS Engine not initialized")
 
-        # Run Inference
-        tts_engine.infer(
-            spk_audio_prompt=f'voice_files/{request.voice_id}.wav', 
-            text=request.text, 
-            output_path=wav_filename, 
-            verbose=True
-        )
+        if use_tts_verseion == 2:
+            # Run Inference 
+            tts_engine.infer(
+                spk_audio_prompt=f'voice_files/{request.voice_id}.wav', 
+                text=request.text, 
+                output_path=wav_filename, 
+                verbose=True
+            )
+        else:
+            # Run Inference for TTS version 1
+            tts_engine.infer(
+                f'voice_files/{request.voice_id}.wav', 
+                request.text, 
+                wav_filename
+            )
         
         # Convert WAV to Opus with specified bitrate using ffmpeg command
         subprocess.run([
@@ -177,12 +212,21 @@ async def generate_audio_wav_json(request: TTSRequest, background_tasks: Backgro
             raise HTTPException(status_code=500, detail="TTS Engine not initialized")
 
         # Run Inference
-        tts_engine.infer(
-            spk_audio_prompt=f'voice_files/{request.voice_id}.wav', 
-            text=request.text, 
-            output_path=wav_filename, 
-            verbose=True
-        )
+        if use_tts_verseion == 2:
+            print(">>>>>>>>>> USING TTS VERSION 2 IN /generate-wav-json <<<<<<<<<<")
+            tts_engine.infer(
+                spk_audio_prompt=f'voice_files/{request.voice_id}.wav', 
+                text=request.text, 
+                output_path=wav_filename, 
+                verbose=True
+            )
+        else:
+            print(">>>>>>>>>> USING TTS VERSION 1 IN /generate-wav-json <<<<<<<<<<")
+            tts_engine.infer(
+                f'voice_files/{request.voice_id}.wav', 
+                request.text, 
+                wav_filename
+            )
         
         # Read WAV file into memory
         with open(wav_filename, 'rb') as f:

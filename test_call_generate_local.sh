@@ -4,10 +4,10 @@
 # Assumes the FastAPI server is running on http://localhost:8803
 BITRATE=40
 # Sample JSON payload
-JSON_DATA='{"text": "Hello! World!!", "voice_id": "voice_01", "bitrate": '"$BITRATE"'}'
+JSON_DATA='{"text": "Hello! World!!", "voice_id": "common_voice_zh-CN_18982615", "bitrate": '"$BITRATE"'}'
 
 # Test /generate-opus
-URL_OPUS="http://localhost:8804/generate-opus"
+URL_OPUS="http://localhost:8000/generate-opus"
 OUTPUT_FILE_OPUS="test_output.opus"
 
 echo "Testing /generate-opus..."
@@ -29,7 +29,7 @@ fi
 echo ""
 
 # Test /generate-wav
-URL_WAV="http://localhost:8804/generate-wav"
+URL_WAV="http://localhost:8000/generate-wav"
 OUTPUT_FILE_WAV="test_output.wav"
 
 echo "Testing /generate-wav..."
@@ -51,7 +51,7 @@ fi
 echo ""
 
 # Test /generate-opus-json
-URL_OPUS_JSON="http://localhost:8804/generate-opus-json"
+URL_OPUS_JSON="http://localhost:8000/generate-opus-json"
 OUTPUT_FILE_OPUS_JSON="test_output_opus.json"
 
 echo "Testing /generate-opus-json..."
@@ -72,7 +72,7 @@ fi
 echo ""
 
 # Test /generate-wav-json
-URL_WAV_JSON="http://localhost:8804/generate-wav-json"
+URL_WAV_JSON="http://localhost:8000/generate-wav-json"
 OUTPUT_FILE_WAV_JSON="test_output_wav.json"
 
 echo "Testing /generate-wav-json..."

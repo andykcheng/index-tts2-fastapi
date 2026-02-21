@@ -1,1 +1,1 @@
-hf download IndexTeam/IndexTTS-2 --local-dir=checkpoints
+uv run hf download IndexTeam/IndexTTS-2 --local-dir=checkpoints
