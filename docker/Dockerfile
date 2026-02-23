@@ -22,7 +22,9 @@ RUN git clone https://github.com/andykcheng/index-tts2-fastapi.git
 WORKDIR /app/index-tts2-fastapi
 RUN uv sync
 RUN uv tool install "huggingface-hub"
-RUN uv run hf download IndexTeam/IndexTTS-2 --local-dir=checkpoints
+RUN uv run hf download IndexTeam/IndexTTS-1.5 \
+  config.yaml bigvgan_discriminator.pth bigvgan_generator.pth bpe.model dvae.pth gpt.pth unigram_12000.vocab \
+  --local-dir checkpoints
 
 # Expose port
 EXPOSE 8000
