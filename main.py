@@ -5,7 +5,6 @@ import io
 import base64
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse, HTMLResponse
-from httpcore import request
 from pydantic import BaseModel
 # from pydub import AudioSegment  <-- Removed pydub
 from indextts.infer_v2 import IndexTTS2
