@@ -4,7 +4,7 @@
 # Assumes the FastAPI server is running on http://localhost:8803
 BITRATE=40
 # Sample JSON payload
-JSON_DATA='{"text": "Hello! World!!", "voice_id": "voice_01", "bitrate": '"$BITRATE"'}'
+JSON_DATA='{"text": "定义生成器二脉冲宽度为十微秒", "voice_id": "voice_01", "bitrate": '"$BITRATE"'}'
 
 # Test /generate-opus
 URL_OPUS="http://localhost:8804/generate-opus"

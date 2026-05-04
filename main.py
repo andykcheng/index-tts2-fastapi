@@ -13,6 +13,25 @@ import yaml
     
 app = FastAPI(title="IndexTTS Opus Server")
 use_tts_verseion = 1
+
+# Load text replacements
+REPLACEMENTS_FILE = "voice_files/replacements.yaml"
+_text_replacements: list[dict] = []
+try:
+    with open(REPLACEMENTS_FILE, "r", encoding="utf-8") as _f:
+        _replacements_data = yaml.safe_load(_f)
+        _text_replacements = _replacements_data.get("replacements", []) if _replacements_data else []
+    print(f"Loaded {len(_text_replacements)} text replacement(s) from {REPLACEMENTS_FILE}")
+except FileNotFoundError:
+    print(f"No replacements file found at {REPLACEMENTS_FILE}, skipping.")
+except Exception as _e:
+    print(f"Error loading replacements file: {_e}")
+
+def apply_text_replacements(text: str) -> str:
+    for rule in _text_replacements:
+        text = text.replace(rule["from"], rule["to"])
+    return text
+
 # Ensure output directory exists
 OUTPUT_DIR = "outputs"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -67,12 +86,14 @@ async def generate_audio_opus(request: TTSRequest, background_tasks: BackgroundT
         if tts_engine is None:
             raise HTTPException(status_code=500, detail="TTS Engine not initialized")
 
+        text = apply_text_replacements(request.text)
+
         # Run Inference
         if use_tts_verseion == 2:
             print(">>>>>>>>>> USING TTS VERSION 2 IN /generate-opus <<<<<<<<<<")
             tts_engine.infer(
                 spk_audio_prompt=f'voice_files/{request.voice_id}.wav', 
-                text=request.text, 
+                text=text, 
                 output_path=wav_filename, 
                 verbose=True
             )
@@ -80,7 +101,7 @@ async def generate_audio_opus(request: TTSRequest, background_tasks: BackgroundT
             print(">>>>>>>>>> USING TTS VERSION 1 IN /generate-opus <<<<<<<<<<")
             tts_engine.infer(
                 f'voice_files/{request.voice_id}.wav', 
-                request.text, 
+                text, 
                 wav_filename
             )
         # Convert WAV to Opus with specified bitrate using ffmpeg command
@@ -116,12 +137,14 @@ async def generate_audio_wav(request: TTSRequest, background_tasks: BackgroundTa
         if tts_engine is None:
             raise HTTPException(status_code=500, detail="TTS Engine not initialized")
 
+        text = apply_text_replacements(request.text)
+
         if use_tts_verseion == 2:
             print(">>>>>>>>>> USING TTS VERSION 2 IN /generate-wav <<<<<<<<<<")
             # Run Inference
             tts_engine.infer(
                 spk_audio_prompt=f'voice_files/{request.voice_id}.wav', 
-                text=request.text, 
+                text=text, 
                 output_path=wav_filename, 
                 verbose=True
             )
@@ -130,7 +153,7 @@ async def generate_audio_wav(request: TTSRequest, background_tasks: BackgroundTa
             # Run Inference
             tts_engine.infer(
                 f'voice_files/{request.voice_id}.wav', 
-                request.text, 
+                text, 
                 wav_filename
             )
         # Read WAV file into memory
@@ -159,11 +182,13 @@ async def generate_audio_opus_json(request: TTSRequest, background_tasks: Backgr
         if tts_engine is None:
             raise HTTPException(status_code=500, detail="TTS Engine not initialized")
 
+        text = apply_text_replacements(request.text)
+
         if use_tts_verseion == 2:
             # Run Inference 
             tts_engine.infer(
                 spk_audio_prompt=f'voice_files/{request.voice_id}.wav', 
-                text=request.text, 
+                text=text, 
                 output_path=wav_filename, 
                 verbose=True
             )
@@ -171,7 +196,7 @@ async def generate_audio_opus_json(request: TTSRequest, background_tasks: Backgr
             # Run Inference for TTS version 1
             tts_engine.infer(
                 f'voice_files/{request.voice_id}.wav', 
-                request.text, 
+                text, 
                 wav_filename
             )
         
