@@ -5,6 +5,7 @@ import io
 import base64
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse, HTMLResponse
+from httpcore import request
 from pydantic import BaseModel
 # from pydub import AudioSegment  <-- Removed pydub
 from indextts.infer_v2 import IndexTTS2
@@ -237,13 +238,13 @@ async def generate_audio_wav_json(request: TTSRequest, background_tasks: Backgro
     try:
         if tts_engine is None:
             raise HTTPException(status_code=500, detail="TTS Engine not initialized")
-
+        text = apply_text_replacements(request.text)
         # Run Inference
         if use_tts_verseion == 2:
             print(">>>>>>>>>> USING TTS VERSION 2 IN /generate-wav-json <<<<<<<<<<")
             tts_engine.infer(
                 spk_audio_prompt=f'voice_files/{request.voice_id}.wav', 
-                text=request.text, 
+                text=text, 
                 output_path=wav_filename, 
                 verbose=True
             )
@@ -251,7 +252,7 @@ async def generate_audio_wav_json(request: TTSRequest, background_tasks: Backgro
             print(">>>>>>>>>> USING TTS VERSION 1 IN /generate-wav-json <<<<<<<<<<")
             tts_engine.infer(
                 f'voice_files/{request.voice_id}.wav', 
-                request.text, 
+                text, 
                 wav_filename
             )
         
