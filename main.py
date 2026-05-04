@@ -28,8 +28,10 @@ except Exception as _e:
     print(f"Error loading replacements file: {_e}")
 
 def apply_text_replacements(text: str) -> str:
+    print("Before replacements:", text)
     for rule in _text_replacements:
         text = text.replace(rule["from"], rule["to"])
+    print("After replacements:", text)
     return text
 
 # Ensure output directory exists
